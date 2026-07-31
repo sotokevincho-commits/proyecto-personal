@@ -1,0 +1,113 @@
+:root {
+  --bg-main: #6b77b2;
+  --bg-card: #7783be;
+  --bg-input: #d0dcf5;
+  --accent-orange: #f28b14;
+  --accent-green: #9ee5bd;
+}
+body {
+  background-color: var(--bg-main);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.app-header {
+  background-color: rgba(0, 0, 0, 0.08);
+  height: 50px;
+}
+.counter-badge {
+  background-color: var(--accent-green);
+  color: #1a432e;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.dashboard-container {
+  height: calc(100vh - 50px);
+  display: flex;
+  flex-direction: column;
+}
+.main-row {
+  height: 70%;
+}
+.bottom-row {
+  height: 30%;
+}
+.panel-card {
+  background-color: var(--bg-card);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.panel-title {
+  color: #ffffff;
+  font-weight: 600;
+  margin: 0;
+}
+.custom-input {
+  background-color: var(--bg-input);
+  border: none;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  color: #333;
+}
+.custom-input:focus {
+  background-color: #e2ebfc;
+  box-shadow: 0 0 0 2px var(--accent-orange);
+}
+.calendar-header-badge {
+  background-color: var(--accent-green);
+  color: #1a432e;
+  border-radius: 4px;
+  font-size: 0.85rem;
+}
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  background-color: rgba(255, 255, 255, 0.15);
+  padding: 6px;
+  border-radius: 6px;
+  align-items: center;
+  text-align: center;
+}
+.day-name {
+  font-weight: bold;
+  font-size: 0.8rem;
+  color: #ffffff;
+  padding: 4px 0;
+}
+.calendar-day {
+  background-color: #ffffff;
+  color: #333;
+  padding: 6px 0;
+  font-size: 0.8rem;
+  border-radius: 3px;
+  font-weight: 500;
+}
+.active-day {
+  border: 2px solid var(--accent-orange);
+  font-weight: bold;
+}
+.export-btn {
+  background-color: var(--accent-orange);
+  border: none;
+  font-size: 0.85rem;
+  border-radius: 8px;
+  transition: opacity 0.2s ease;
+}
+.export-btn:hover {
+  background-color: #d9790d;
+}
+.filter-btn {
+  background-color: #d6d9e6;
+  border: 1px solid #b8bccd;
+  color: #2b2b2b;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
