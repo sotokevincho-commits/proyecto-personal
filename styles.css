@@ -13,7 +13,6 @@ body {
   height: 100vh;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
 }
 .app-header {
   background-color: rgba(0, 0, 0, 0.08);
@@ -32,8 +31,10 @@ body {
   display: flex;
   flex-direction: column;
 }
-.main-row {
-  height: 70%;
+#main-task-list{
+
+    overflow-y:auto;
+
 }
 .bottom-row {
   height: 30%;
@@ -110,4 +111,25 @@ body {
   color: #2b2b2b;
   font-weight: 600;
   font-size: 0.85rem;
+}
+.task-card{
+    background:#d0dcf5;
+    border-radius:8px;
+    padding:15px;
+    color:#333;
+    transition:.2s;
+}
+
+.task-card:hover{
+    transform:translateY(-2px);
+}
+
+.task-card h6{
+    margin-bottom:8px;
+    font-weight:700;
+}
+
+.task-card p{
+    margin-bottom:12px;
+    font-size:.9rem;
 }
