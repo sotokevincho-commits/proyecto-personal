@@ -1,49 +1,35 @@
-// js/taskManager.js
-
 class TaskManager {
     constructor(currentId = 0) {
         this.tasks = [];
         this.currentId = currentId;
     }
 
-    /**
-     * Agrega una nueva tarea a la colección y guarda en LocalStorage
-     */
-    addTask(name, description, startDate, dueDate, priority) {
-        const newTask = {
-            id: this.currentId++,
-            name: name,
-            description: description,
-            startDate: startDate,
-            dueDate: dueDate,
-            priority: priority,
-            status: 'Pendiente'
-        };
+addTask(name, description, startDate, dueDate, priority) {
+    const newTask = {
+        id: this.currentId++,
+        name: name,
+        description: description,
+        startDate: startDate,
+        dueDate: dueDate,
+        priority: priority,
+        status: 'PORHACER'
+    };
 
-        this.tasks.push(newTask);
-        this.save(); // Guardar cambios en el navegador
-    }
+    this.tasks.push(newTask);
+    this.save(); 
+}
 
-    /**
-     * Elimina una tarea mediante su ID y guarda en LocalStorage
-     */
     deleteTask(taskId) {
         this.tasks = this.tasks.filter(task => task.id !== taskId);
-        this.save(); // Guardar cambios en el navegador
+        this.save(); 
     }
 
-    /**
-     * Guarda el arreglo de tareas y el ID actual en LocalStorage
-     */
     save() {
         const tasksJson = JSON.stringify(this.tasks);
         localStorage.setItem('tasks', tasksJson);
         localStorage.setItem('currentId', String(this.currentId));
     }
 
-    /**
-     * Carga las tareas guardadas en LocalStorage
-     */
     load() {
         if (localStorage.getItem('tasks')) {
             const tasksJson = localStorage.getItem('tasks');
@@ -56,9 +42,6 @@ class TaskManager {
         }
     }
 
-    /**
-     * Renderiza las tareas almacenadas en el DOM
-     */
     render() {
         const taskListContainer = document.querySelector('#main-task-list');
         if (!taskListContainer) return;
@@ -77,7 +60,7 @@ class TaskManager {
         this.tasks.forEach(task => {
             const isCompleted = task.status === 'Completada';
 
-            let badgeClass = 'bg-warning text-dark'; // Pendiente / Baja (Naranja)
+            let badgeClass = 'bg-warning text-dark'; // PORHACER / Baja (Naranja)
 
             if (isCompleted) {
                 badgeClass = 'bg-success'; // Completada (Verde)
