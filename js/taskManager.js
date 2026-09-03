@@ -17,6 +17,13 @@ class TaskManager {
         this.tasks.push(newTask);
         this.save();
     }
+    updateTask(updatedTask) {
+        const index = this.tasks.findIndex(t => t.id === updatedTask.id);
+        if (index !== -1) {
+            this.tasks[index] = { ...this.tasks[index], ...updatedTask };
+            this.save();
+        }
+    }
     deleteTask(taskId) {
         const newTasks = [];
         for (let task of this.tasks) {
@@ -67,11 +74,16 @@ class TaskManager {
                 <div class="task-card mb-3 ${isCompleted ? 'task-completed' : ''}" data-task-id="${task.id}">
                     <div class="d-flex justify-content-between align-items-start">
                         <h6>${task.name}</h6>
-                        <button type="button" class="btn-close btn-close-white delete-button" aria-label="Eliminar" title="Eliminar tarea"></button>
+                        <div class="d-flex align-items-center gap-2">
+                            <!-- Botón Editar -->
+                            <button type="button" class="btn btn-sm btn-outline-info edit-button py-0 px-1" title="Editar tarea"> EDITAR </button>
+                            <!-- Botón Eliminar -->
+                            <button type="button" class="btn-close btn-close-white delete-button" aria-label="Eliminar" title="Eliminar tarea"></button>
+                        </div>
                     </div>
-                    <p>${task.description}</p>
+                    <p class="mb-2">${task.description}</p>
                     <div class="d-flex justify-content-between align-items-center">
-                        <small>${task.dueDate}</small>
+                        <small> ${task.startDate || ''} / ${task.dueDate}</small>
                         <div class="d-flex align-items-center gap-2">
                             <span class="badge ${badgeClass} status-badge">
                                 ${task.status}

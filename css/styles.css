@@ -20,42 +20,42 @@
 }
 @font-face {
   font-family: "Turret Road";
-  src: url("fonts/TurretRoad-ExtraLight (1).ttf") format("truetype");
+  src: url("../fonts/TurretRoad-ExtraLight\ \(1\).ttf") format("truetype");
   font-weight: 200;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
   font-family: "Turret Road";
-  src: url("fonts/TurretRoad-Light (1).ttf") format("truetype");
+  src: url("../fonts/TurretRoad-Light\ \(1\).ttf") format("truetype");
   font-weight: 300;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
   font-family: "Turret Road";
-  src: url("fonts/TurretRoad-Regular (1).ttf") format("truetype");
+  src: url("../fonts/TurretRoad-Regular\ \(1\).ttf") format("truetype");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
   font-family: "Turret Road";
-  src: url("fonts/TurretRoad-Medium (1).ttf") format("truetype");
+  src: url("../fonts/TurretRoad-Medium\ \(1\).ttf") format("truetype");
   font-weight: 500;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
   font-family: "Turret Road";
-  src: url("fonts/TurretRoad-Bold (1).ttf") format("truetype");
+  src: url("../fonts/TurretRoad-Bold\ \(1\).ttf") format("truetype");
   font-weight: 700;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
   font-family: "Turret Road";
-  src: url("fonts/TurretRoad-ExtraBold (1).ttf") format("truetype");
+  src: url("../fonts/TurretRoad-ExtraBold\ \(1\).ttf") format("truetype");
   font-weight: 800;
   font-style: normal;
   font-display: swap;

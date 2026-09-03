@@ -2,6 +2,7 @@ const taskManager = new TaskManager();
 taskManager.load();
 taskManager.render();
 console.log("TaskManager inicializado con tareas guardadas:", taskManager.tasks);
+let currentEditingTaskId = null;
 // 2. Selección de elementos del DOM por su ID
 const taskForm = document.querySelector('#task-form');
 const taskTitle = document.querySelector('#task-title');
@@ -12,6 +13,8 @@ const taskPriority = document.querySelector('#task-priority');
 const mainTaskList = document.querySelector('#main-task-list');
 const startDateFeedback = document.querySelector('#start-date-feedback');
 const endDateFeedback = document.querySelector('#end-date-feedback');
+const formPanelTitle = document.querySelector('.panel-card .panel-title');
+const submitBtn = taskForm ? taskForm.querySelector('button[type="submit"]') : null;
 // Limpiar la marca de error en tiempo real cuando el usuario interactúa con el campo
 [taskTitle, taskDetails, startDate, endDate, taskPriority].forEach(input => {
     if (input) {
@@ -39,6 +42,15 @@ function resetFormValidation() {
         }
     });
 }
+
+function resetFormToCreateMode() {
+    currentEditingTaskId = null;
+    taskForm.reset();
+    resetFormValidation();
+    if (formPanelTitle) formPanelTitle.textContent = 'Crear nueva tarea';
+    if (submitBtn) submitBtn.textContent = 'Agregar tarea';
+}
+
 //Función de validación del formulario
 function validFormFieldInput(data) {
     console.log("Validando datos del formulario:", data);
@@ -81,10 +93,13 @@ function validFormFieldInput(data) {
 // Escuchador de clics para la lista de tareas
 if (mainTaskList) {
     mainTaskList.addEventListener('click', (event) => {
+        // 1. Obtenemos el elemento padre y el taskId desde el inicio para TODOS los eventos
+        const parentTask = event.target.closest('.task-card');
+        if (!parentTask) return;
+        const taskId = Number(parentTask.dataset.taskId);
+
+        // 2. Opción Eliminar
         if (event.target.classList.contains('delete-button') || event.target.closest('.delete-button')) {
-            const parentTask = event.target.closest('.task-card');
-            if (!parentTask) return;
-            const taskId = Number(parentTask.dataset.taskId);
             Swal.fire({
                 title: '¿Eliminar tarea?',
                 text: 'Esta acción no se puede deshacer.',
@@ -96,10 +111,12 @@ if (mainTaskList) {
                 cancelButtonText: 'Cancelar'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // Eliminar, guardar y volver a renderizar
                     taskManager.deleteTask(taskId);
                     taskManager.save();
                     taskManager.render();
+                    if (currentEditingTaskId === taskId) {
+                        resetFormToCreateMode();
+                    }
                     Swal.fire({
                         icon: 'success',
                         title: 'Tarea eliminada',
@@ -110,11 +127,30 @@ if (mainTaskList) {
             });
             return;
         }
+
+        // editar tarea
+        if (event.target.classList.contains('edit-button') || event.target.closest('.edit-button')) {
+            const taskToEdit = taskManager.tasks.find(t => t.id === taskId);
+            if (taskToEdit) {
+                currentEditingTaskId = taskToEdit.id;
+                taskTitle.value = taskToEdit.name;
+                taskDetails.value = taskToEdit.description;
+                startDate.value = taskToEdit.startDate;
+                endDate.value = taskToEdit.dueDate;
+                taskPriority.value = taskToEdit.priority;
+                
+                if (formPanelTitle) formPanelTitle.textContent = 'Editar tarea';
+                if (submitBtn) submitBtn.textContent = 'Guardar cambios';
+                
+                resetFormValidation();
+                taskForm.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+            return;
+        }
+
+        // 4. Opción Cambiar Estado
         const toggleBtn = event.target.closest('.toggle-complete-btn');
         if (toggleBtn) {
-            const parentTask = event.target.closest('.task-card');
-            if (!parentTask) return;
-            const taskId = Number(parentTask.dataset.taskId);
             const task = taskManager.tasks.find(t => t.id === taskId);
             if (task) {
                 task.status = task.status === 'Completada' ? 'PORHACER' : 'Completada';
@@ -144,21 +180,37 @@ taskForm.addEventListener('submit', function (event) {
             confirmButtonText: 'Entendido'
         });
     } else {
-        Swal.fire({
-            icon: 'success',
-            title: '¡Tarea agregada!',
-            text: 'La tarea ha sido guardada con éxito.',
-            timer: 1500,
-            showConfirmButton: false
-        });
-        // 1. Agregar la tarea al TaskManager
-        taskManager.addTask(formData.name, formData.description, formData.startDate, formData.dueDate, formData.priority);
-        // 2. Renderizar las tareas en pantalla
+        // Si la variable guarda un ID, estamos EDITANDO
+        if (currentEditingTaskId !== null) {
+            taskManager.updateTask({
+                id: currentEditingTaskId,
+                name: formData.name,
+                description: formData.description,
+                startDate: formData.startDate,
+                dueDate: formData.dueDate,
+                priority: formData.priority
+            });
+
+            Swal.fire({
+                icon: 'success',
+                title: '¡Tarea actualizada!',
+                text: 'Los cambios se han guardado con éxito.',
+                timer: 1500,
+                showConfirmButton: false
+            });
+        } else {
+            taskManager.addTask(formData.name, formData.description, formData.startDate, formData.dueDate, formData.priority);
+
+            Swal.fire({
+                icon: 'success',
+                title: '¡Tarea agregada!',
+                text: 'La tarea ha sido guardada con éxito.',
+                timer: 1500,
+                showConfirmButton: false
+            });
+        }
+
         taskManager.render();
-        // 3. Verificar en consola
-        console.log("Tareas actuales:", taskManager.tasks);
-        // Reinicio del formulario y de las marcas de validación
-        taskForm.reset();
-        resetFormValidation();
+        resetFormToCreateMode();
     }
 });
