@@ -60,32 +60,44 @@ class TaskManager {
         }
         this.tasks.forEach(task => {
             const isCompleted = task.status === 'Completada';
-            let badgeClass = 'bg-warning text-dark';
-            if (isCompleted) {
-                badgeClass = 'bg-success';
-            } else if (task.priority === 'alta') {
-                badgeClass = 'bg-danger';
+            
+            // 1. Color exclusivo para el estado
+            let statusClass = isCompleted ? 'bg-success' : 'bg-warning text-dark';
+            
+            // 2. Colores exclusivos para la prioridad (Rojo, Azul, Verde)
+            let priorityColor = '#6fd9a8'; // Verde (Baja por defecto)
+            let priorityText = 'Baja';
+            
+            if (task.priority === 'alta') {
+                priorityColor = '#e2707c'; // Rojo
+                priorityText = 'Alta';
             } else if (task.priority === 'media') {
-                badgeClass = 'bg-primary';
-            } else if (task.priority === 'baja') {
-                badgeClass = 'bg-secondary';
+                priorityColor = '#7ba7e0'; // Azul
+                priorityText = 'Media';
             }
+
             const taskHtml = `
                 <div class="task-card mb-3 ${isCompleted ? 'task-completed' : ''}" data-task-id="${task.id}">
                     <div class="d-flex justify-content-between align-items-start">
                         <h6>${task.name}</h6>
                         <div class="d-flex align-items-center gap-2">
-                            <!-- Botón Editar -->
                             <button type="button" class="btn btn-sm btn-outline-info edit-button py-0 px-1" title="Editar tarea"> EDITAR </button>
-                            <!-- Botón Eliminar -->
                             <button type="button" class="btn-close btn-close-white delete-button" aria-label="Eliminar" title="Eliminar tarea"></button>
                         </div>
                     </div>
                     <p class="mb-2">${task.description}</p>
-                    <div class="d-flex justify-content-between align-items-center">
-                        <small> ${task.startDate || ''} / ${task.dueDate}</small>
+                    
+                    <!-- Nueva etiqueta de prioridad -->
+                    <div class="mb-3">
+                        <span style="font-size: 0.75rem; border: 1px solid ${priorityColor}; color: ${priorityColor}; padding: 3px 10px; border-radius: 12px; background: ${priorityColor}1A; font-weight: 600;">
+                            Prioridad: ${priorityText}
+                        </span>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mt-2">
+                        <small> ${task.startDate || 'Sin inicio'} ➔ ${task.dueDate}</small>
                         <div class="d-flex align-items-center gap-2">
-                            <span class="badge ${badgeClass} status-badge">
+                            <span class="badge ${statusClass} status-badge">
                                 ${task.status}
                             </span>
                             <button type="button" class="btn btn-sm ${isCompleted ? 'btn-success' : 'btn-outline-light'} toggle-complete-btn" title="Marcar como completada">

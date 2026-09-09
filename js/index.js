@@ -114,6 +114,7 @@ if (mainTaskList) {
                     taskManager.deleteTask(taskId);
                     taskManager.save();
                     taskManager.render();
+                    renderCalendar();
                     if (currentEditingTaskId === taskId) {
                         resetFormToCreateMode();
                     }
@@ -156,6 +157,7 @@ if (mainTaskList) {
                 task.status = task.status === 'Completada' ? 'PORHACER' : 'Completada';
                 taskManager.save();
                 taskManager.render();
+                renderCalendar();
             }
         }
     });
@@ -211,6 +213,108 @@ taskForm.addEventListener('submit', function (event) {
         }
 
         taskManager.render();
+        renderCalendar();
         resetFormToCreateMode();
     }
 });
+const taskColors = ['#e2707c', '#7ba7e0', '#6fd9a8', '#f1c40f', '#9b59b6', '#e67e22', '#1abc9c', '#e84393', '#00cec9', '#fd79a8'];
+let currentDate = new Date();
+const calendarGrid = document.querySelector('.calendar-grid');
+const monthYearText = document.querySelector('#calendar-month-year');
+const prevMonthBtn = document.querySelectorAll('.calendar-header-badge').length ? document.querySelectorAll('.btn-outline-light')[0] : null;
+const nextMonthBtn = document.querySelectorAll('.calendar-header-badge').length ? document.querySelectorAll('.btn-outline-light')[1] : null;
+function renderCalendar() {
+    if (!calendarGrid) return;
+    const dayNames = `
+        <div class="day-name">D</div><div class="day-name">L</div><div class="day-name">M</div>
+        <div class="day-name">M</div><div class="day-name">J</div><div class="day-name">V</div><div class="day-name">S</div>
+    `; 
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+    if (monthYearText) monthYearText.textContent = `${monthNames[month]} ${year}`;
+    let html = dayNames;
+    for (let i = 0; i < firstDay; i++) html += `<div></div>`;
+    for (let i = 1; i <= daysInMonth; i++) {
+        const currentDayStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+        const tasksToday = taskManager.tasks.filter(task => {
+            return task.startDate === currentDayStr || task.dueDate === currentDayStr;
+        });
+        let dayStyles = "";
+        let isTaskDay = tasksToday.length > 0;
+        if (isTaskDay) {
+            let dayColors = [...new Set(tasksToday.map(t => taskColors[t.id % taskColors.length]))];
+            let baseStyles = "font-weight: 700; transform: scale(1.06); cursor: pointer;";
+            if (dayColors.length === 1) {
+                dayStyles = `border: 2px solid ${dayColors[0]}; box-shadow: 0 0 12px ${dayColors[0]}60; ${baseStyles}`;
+            } else if (dayColors.length === 2) {
+                dayStyles = `
+                    border-style: solid; border-width: 2px; 
+                    border-top-color: ${dayColors[0]}; border-left-color: ${dayColors[0]}; 
+                    border-bottom-color: ${dayColors[1]}; border-right-color: ${dayColors[1]}; 
+                    box-shadow: -3px -3px 12px ${dayColors[0]}60, 3px 3px 12px ${dayColors[1]}60; 
+                    ${baseStyles}
+                `;
+            } else if (dayColors.length === 3) {
+                dayStyles = `
+                    border-style: solid; border-width: 2px; 
+                    border-top-color: ${dayColors[0]}; border-left-color: ${dayColors[0]}; 
+                    border-right-color: ${dayColors[1]}; border-bottom-color: ${dayColors[2]}; 
+                    box-shadow: -3px -3px 12px ${dayColors[0]}60, 3px -3px 12px ${dayColors[1]}60, 0px 3px 12px ${dayColors[2]}60; 
+                    ${baseStyles}
+                `;
+            } else {
+                dayStyles = `
+                    border-style: solid; border-width: 2px; 
+                    border-top-color: ${dayColors[0]}; border-right-color: ${dayColors[1]}; 
+                    border-bottom-color: ${dayColors[2]}; border-left-color: ${dayColors[3]}; 
+                    box-shadow: 0px -3px 12px ${dayColors[0]}60, 3px 0px 12px ${dayColors[1]}60, 0px 3px 12px ${dayColors[2]}60, -3px 0px 12px ${dayColors[3]}60; 
+                    ${baseStyles}
+                `;
+            }
+        } 
+        html += `<div class="calendar-day ${isTaskDay ? 'has-tasks' : ''}" style="${dayStyles}" data-date="${currentDayStr}">${i}</div>`;
+    }
+    calendarGrid.innerHTML = html;
+}
+if (prevMonthBtn && nextMonthBtn) {
+    prevMonthBtn.addEventListener('click', () => { currentDate.setMonth(currentDate.getMonth() - 1); renderCalendar(); });
+    nextMonthBtn.addEventListener('click', () => { currentDate.setMonth(currentDate.getMonth() + 1); renderCalendar(); });
+}
+calendarGrid.addEventListener('click', (e) => {
+    if (e.target.classList.contains('has-tasks')) {
+        const dateStr = e.target.dataset.date;
+        const tasksToday = taskManager.tasks.filter(task => {
+            const start = task.startDate || task.dueDate;
+            const end = task.dueDate || task.startDate;
+            return dateStr >= start && dateStr <= end;
+        });
+        if (tasksToday.length > 0) {
+            let tasksHtml = '<div class="text-start mt-3">';
+            tasksToday.forEach(task => {
+                let statusColor = task.status === 'Completada' ? 'success' : 'warning text-dark';
+                let taskColor = taskColors[task.id % taskColors.length]; 
+                tasksHtml += `
+                    <div class="mb-3 p-3 border rounded shadow-sm" style="background: rgba(35, 31, 65, 0.48); border-color: ${taskColor}40 !important; border-left: 4px solid ${taskColor} !important;">
+                        <h6 class="fw-bold mb-2" style="color: ${taskColor};">${task.name}</h6>
+                        <p class="mb-2 small text-white-50">
+                            <strong class="text-white">Rango:</strong> ${task.startDate || 'N/A'} al ${task.dueDate}
+                        </p>
+                        <span class="badge bg-${statusColor}">${task.status}</span>
+                    </div>
+                `;
+            });
+            tasksHtml += '</div>';
+            Swal.fire({
+                title: `<span style="color: #f2f0fb; font-size: 1.25rem;">Tareas programadas</span><br><small style="color: #8f85b8; font-size: 0.9rem;">${dateStr}</small>`,
+                html: tasksHtml,
+                background: '#090817', 
+                confirmButtonColor: '#9d8fef',
+                confirmButtonText: 'Cerrar ventana'
+            });
+        }
+    }
+});
+renderCalendar();
