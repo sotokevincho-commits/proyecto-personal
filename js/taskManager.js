@@ -2,6 +2,7 @@ class TaskManager {
     constructor(currentId = 0) {
         this.tasks = [];
         this.currentId = currentId;
+        this.currentFilter = 'all';
     }
     addTask(name, description, startDate, dueDate, priority) {
         this.currentId++;
@@ -46,33 +47,52 @@ class TaskManager {
             this.currentId = Number(localStorage.getItem('currentId'));
         }
     }
+    updatePendingCounter() {
+        const counter = document.querySelector('#pending-counter');
+        if (!counter) return;
+        counter.textContent = this.tasks.filter(t => t.status !== 'Completada').length;
+    }
+    getFilteredTasks() {
+        if (this.currentFilter === 'pending') {
+            return this.tasks.filter(t => t.status !== 'Completada');
+        }
+        if (this.currentFilter === 'completed') {
+            return this.tasks.filter(t => t.status === 'Completada');
+        }
+        return this.tasks;
+    }
     render() {
+        this.updatePendingCounter();
         const taskListContainer = document.querySelector('#main-task-list');
         if (!taskListContainer) return;
         taskListContainer.innerHTML = '';
-        if (this.tasks.length === 0) {
+        const visibleTasks = this.getFilteredTasks();
+
+        if (visibleTasks.length === 0) {
+            const messages = {
+                all: 'No hay tareas creadas todavía.',
+                pending: 'No tienes tareas pendientes. ¡Buen trabajo!',
+                completed: 'Aún no has completado ninguna tarea.'
+            };
             taskListContainer.innerHTML = `
                 <div class="text-center text-white-50 py-4">
-                    <p class="mb-0">No hay tareas creadas todavía.</p>
+                    <p class="mb-0">${messages[this.currentFilter]}</p>
                 </div>
             `;
             return;
         }
-        this.tasks.forEach(task => {
+        visibleTasks.forEach(task => {
             const isCompleted = task.status === 'Completada';
-            
-            // 1. Color exclusivo para el estado
             let statusClass = isCompleted ? 'bg-success' : 'bg-warning text-dark';
-            
-            // 2. Colores exclusivos para la prioridad (Rojo, Azul, Verde)
-            let priorityColor = '#6fd9a8'; // Verde (Baja por defecto)
+
+            let priorityColor = '#6fd9a8'; 
             let priorityText = 'Baja';
-            
+
             if (task.priority === 'alta') {
-                priorityColor = '#e2707c'; // Rojo
+                priorityColor = '#e2707c'; 
                 priorityText = 'Alta';
             } else if (task.priority === 'media') {
-                priorityColor = '#7ba7e0'; // Azul
+                priorityColor = '#7ba7e0'; 
                 priorityText = 'Media';
             }
 

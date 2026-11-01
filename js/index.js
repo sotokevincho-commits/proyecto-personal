@@ -11,6 +11,18 @@ const startDate = document.querySelector('#start-date');
 const endDate = document.querySelector('#end-date');
 const taskPriority = document.querySelector('#task-priority');
 const mainTaskList = document.querySelector('#main-task-list');
+const filterButtons = document.querySelectorAll('.filter-btn');
+
+filterButtons.forEach(button => {
+    button.addEventListener('click', () => {
+        taskManager.currentFilter = button.dataset.filter;
+
+        filterButtons.forEach(b => b.classList.toggle('active', b === button));
+
+        taskManager.render();
+        if (mainTaskList) mainTaskList.scrollTop = 0;
+    });
+});
 const startDateFeedback = document.querySelector('#start-date-feedback');
 const endDateFeedback = document.querySelector('#end-date-feedback');
 const formPanelTitle = document.querySelector('.panel-card .panel-title');
@@ -139,10 +151,10 @@ if (mainTaskList) {
                 startDate.value = taskToEdit.startDate;
                 endDate.value = taskToEdit.dueDate;
                 taskPriority.value = taskToEdit.priority;
-                
+
                 if (formPanelTitle) formPanelTitle.textContent = 'Editar tarea';
                 if (submitBtn) submitBtn.textContent = 'Guardar cambios';
-                
+
                 resetFormValidation();
                 taskForm.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
@@ -228,7 +240,7 @@ function renderCalendar() {
     const dayNames = `
         <div class="day-name">D</div><div class="day-name">L</div><div class="day-name">M</div>
         <div class="day-name">M</div><div class="day-name">J</div><div class="day-name">V</div><div class="day-name">S</div>
-    `; 
+    `;
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
     const firstDay = new Date(year, month, 1).getDay();
@@ -244,7 +256,10 @@ function renderCalendar() {
         });
         let dayStyles = "";
         let isTaskDay = tasksToday.length > 0;
-        if (isTaskDay) {
+        const completedCount = tasksToday.filter(t => t.status === 'Completada').length;
+        const allDone = isTaskDay && completedCount === tasksToday.length;
+        const somePending = isTaskDay && completedCount > 0 && !allDone;
+        if (isTaskDay && !allDone) {
             let dayColors = [...new Set(tasksToday.map(t => taskColors[t.id % taskColors.length]))];
             let baseStyles = "font-weight: 700; transform: scale(1.06); cursor: pointer;";
             if (dayColors.length === 1) {
@@ -274,8 +289,18 @@ function renderCalendar() {
                     ${baseStyles}
                 `;
             }
-        } 
-        html += `<div class="calendar-day ${isTaskDay ? 'has-tasks' : ''}" style="${dayStyles}" data-date="${currentDayStr}">${i}</div>`;
+        }
+        else if (allDone) {
+            dayStyles = "font-weight: 700; transform: scale(1.06); cursor: pointer;";
+        }
+        const dayClasses = [
+            'calendar-day',
+            isTaskDay ? 'has-tasks' : '',
+            allDone ? 'day-completed' : '',
+            somePending ? 'day-partial' : ''
+        ].join(' ');
+
+        html += `<div class="${dayClasses}" style="${dayStyles}" data-date="${currentDayStr}">${i}</div>`;
     }
     calendarGrid.innerHTML = html;
 }
@@ -287,15 +312,16 @@ calendarGrid.addEventListener('click', (e) => {
     if (e.target.classList.contains('has-tasks')) {
         const dateStr = e.target.dataset.date;
         const tasksToday = taskManager.tasks.filter(task => {
-            const start = task.startDate || task.dueDate;
-            const end = task.dueDate || task.startDate;
-            return dateStr >= start && dateStr <= end;
+            return task.startDate === dateStr || task.dueDate === dateStr;
         });
+
         if (tasksToday.length > 0) {
             let tasksHtml = '<div class="text-start mt-3">';
+
             tasksToday.forEach(task => {
                 let statusColor = task.status === 'Completada' ? 'success' : 'warning text-dark';
-                let taskColor = taskColors[task.id % taskColors.length]; 
+                let taskColor = taskColors[task.id % taskColors.length];
+
                 tasksHtml += `
                     <div class="mb-3 p-3 border rounded shadow-sm" style="background: rgba(35, 31, 65, 0.48); border-color: ${taskColor}40 !important; border-left: 4px solid ${taskColor} !important;">
                         <h6 class="fw-bold mb-2" style="color: ${taskColor};">${task.name}</h6>
@@ -307,10 +333,11 @@ calendarGrid.addEventListener('click', (e) => {
                 `;
             });
             tasksHtml += '</div>';
+
             Swal.fire({
                 title: `<span style="color: #f2f0fb; font-size: 1.25rem;">Tareas programadas</span><br><small style="color: #8f85b8; font-size: 0.9rem;">${dateStr}</small>`,
                 html: tasksHtml,
-                background: '#090817', 
+                background: '#090817',
                 confirmButtonColor: '#9d8fef',
                 confirmButtonText: 'Cerrar ventana'
             });
